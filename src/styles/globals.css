@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --color: #fb5234;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --color: #fb5234;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+/* swiper */
+.swiper {
+  overflow: visible;
+}
+/* .swiper .swiper-wrapper {
+  max-width: 1500px;
+} */
+.swiper .swiper-pagination {
+  position: static;
+  margin-top: 20px;
+}
+.swiper .swiper-pagination-bullet {
+  background-color: #0a0a0a;
+  opacity: 0.5;
+}
+.swiper .swiper-pagination-bullet-active {
+  background-color: var(--color);
+  opacity: 1;
+}
+/* 모바일 버전 */
+@media (max-width: 768px) {
+  .swiper .swiper-pagination {
+    display: none;
+  }
+}
