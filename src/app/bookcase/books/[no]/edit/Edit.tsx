@@ -11,7 +11,7 @@ import { getBook } from '@/app/api/apiService';
 import { Book } from '@/types/definition';
 import { useAuth } from '@/components/AuthContext';
 
-const Page = () => {
+export default function Page() {
   const router = useRouter();
   const { token } = useAuth();
   const { no } = useParams();
@@ -226,6 +226,4 @@ const Page = () => {
       </form>
     </div>
   );
-};
-
-export default Page;
+}
