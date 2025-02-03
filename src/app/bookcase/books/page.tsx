@@ -8,7 +8,7 @@ import Pagination from '@/components/pagination';
 import { useAuth } from '@/components/AuthContext';
 import { getBooks } from '@/app/api/apiService';
 import { Book } from '@/types/definition';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const Page = () => {
   const { isLoggedIn, token } = useAuth();
@@ -17,6 +17,8 @@ const Page = () => {
   const [totalPage, setTotalPage] = useState(0);
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
+  const router = useRouter();
+
   useEffect(() => {
     if (token) {
       getBooks(token, currentPage - 1, 5).then((res) => {
@@ -25,6 +27,9 @@ const Page = () => {
       });
     }
   }, [token, key, currentPage]);
+  const handleRouter = () => {
+    router.push('/bookcase/books/${book.no}');
+  };
 
   return (
     <div className="text-black p-12 md:p-4">
@@ -81,11 +86,9 @@ const Page = () => {
                     </Link>
                   </td>
                   <td className="text-xl font-bold sm:text-base hover:text-[#fb5234]">
-                    <Link
-                      href={`/bookcase/books/${book.no}`}
-                      className="w-full h-full">
+                    <button onClick={handleRouter} className="w-full h-full">
                       {book.title && book.title}
-                    </Link>
+                    </button>
                   </td>
                   <td className="sm:hidden">{book.author && book.author}</td>
                   <td className="lg:hidden">{book.rigDate && book.rigDate}</td>

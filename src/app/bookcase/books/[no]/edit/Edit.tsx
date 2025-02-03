@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import TextArea from '@/lib/slate';
+import TextArea from '@/lib/slate'; // 외부 라이브러리
 import Dropzone from '@/lib/dorpzone';
 import Input from '@/components/input';
 import { updateBook, updateFile, deleteFile } from '@/app/api/apiService';
@@ -11,37 +11,44 @@ import { getBook } from '@/app/api/apiService';
 import { Book } from '@/types/definition';
 import { useAuth } from '@/components/AuthContext';
 
-export default function Page() {
+export default function EditPage() {
   const router = useRouter();
   const { token } = useAuth();
-  const { no } = useParams();
+  const { no } = useParams() as { no: string };
   const [bookData, setBookData] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [loading, setLoading] = useState(true);
+  const [files, setFiles] = useState<File[]>([]);
+
+  // 페이지 로드 시 bookData와 sessionStorage 초기화
   useEffect(() => {
     const fetchBookData = async () => {
       try {
         const res = await getBook(Number(no));
         setBookData(res.data);
-        sessionStorage.setItem('SlateText', res.data.review);
+        // sessionStorage에 리뷰 데이터 저장
+        sessionStorage.setItem('SlateText', res.data.review || '');
       } catch (error) {
         console.error('책 정보 로딩 실패:', error);
         alert('책 정보를 불러오는데 실패했습니다.');
         router.back();
       } finally {
-        setLoading(false); // 로딩 완료
+        setLoading(false);
       }
     };
     fetchBookData();
   }, [no, router]);
-  const [files, setFiles] = useState<File[]>([]);
 
+  // 파일 선택 핸들러
   const handleFileChange = (acceptedFiles: File[]) => {
     setFiles(acceptedFiles);
   };
 
+  // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+
+    // 필수 필드 검증
     if (formData.get('title') === '') {
       alert('책 이름을 입력해 주세요.');
       return;
@@ -53,36 +60,44 @@ export default function Page() {
       fileFormData.append('file', files[0]);
 
       try {
-        const res = await updateFile(Number(no), fileFormData); // 파일 업로드 API 호출
+        const res = await updateFile(Number(no), fileFormData);
         formData.append('image', res.data);
-        if (
-          bookData?.image !== res.data &&
-          bookData?.image !== null &&
-          bookData?.image !== undefined
-        ) {
+        if (bookData?.image && bookData.image !== res.data) {
           await deleteFile(bookData.image);
         }
       } catch (error) {
         console.error('파일 업로드 실패:', error);
         return;
       }
+    } else {
+      formData.append('image', bookData?.image || '');
     }
 
-    try {
-      const review = sessionStorage.getItem('SlateText') ?? '';
+    // sessionStorage에서 리뷰 데이터 가져오기
+    const review = sessionStorage.getItem('SlateText') || '';
+    formData.append('review', review);
 
-      formData.append('review', review);
-      const res = await updateBook(formData); // 책 업데이트 API 호출
+    // 책 정보 업데이트
+    try {
+      const res = await updateBook(formData);
       if (res.data === 'success') {
         alert('책 정보 수정 완료');
-        sessionStorage.removeItem('SlateText');
+        sessionStorage.removeItem('SlateText'); // sessionStorage 정리
         router.push('/bookcase/books');
       }
     } catch (error) {
       console.error('책 정보 수정 실패:', error);
+      alert('책 정보 수정에 실패했습니다.');
     }
   };
 
+  // 취소 버튼 핸들러
+  const handleClose = () => {
+    sessionStorage.removeItem('SlateText'); // sessionStorage 정리
+    router.back();
+  };
+
+  // 로딩 중 UI
   if (loading) {
     return (
       <div className="w-full h-screen flex justify-center items-center">
@@ -90,10 +105,7 @@ export default function Page() {
       </div>
     );
   }
-  const handleClose = () => {
-    sessionStorage.removeItem('SlateText');
-    router.back();
-  };
+
   return (
     <div className="w-full p-8 md:p-2">
       <div className="border border-gray-300 mb-8 flex justify-between p-4 items-center rounded-xl text-black md:mb-2 sm:flex-col md:p-2 md:px-4">
@@ -201,13 +213,7 @@ export default function Page() {
             <div className="w-full text-black text-xl font-bold mb-4">
               상세 리뷰
             </div>
-            <TextArea
-              currentText={
-                sessionStorage.getItem('SlateText')
-                  ? sessionStorage.getItem('SlateText')
-                  : ''
-              }
-            />
+            <TextArea currentText={sessionStorage.getItem('SlateText') || ''} />
           </div>
         </div>
         <div className="w-full flex justify-end gap-4 md:gap-2 mt-4 text-black">

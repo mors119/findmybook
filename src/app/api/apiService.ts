@@ -1,11 +1,11 @@
 import axios from 'axios';
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'http://3.35.218.39:8080',
   timeout: 5000, // 요청 제한 시간
   headers: { 'Content-Type': 'application/json' },
 });
 const fileClient = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'http://3.35.218.39:8080',
   timeout: 5000, // 요청 제한 시간
   headers: { 'Content-Type': 'multipart/form-data' },
 });
